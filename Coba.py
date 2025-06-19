@@ -43,7 +43,7 @@ if st.session_state.page == "home":
             st.success(f"Terima Kasih {nama_pengunjung}, Respon anda sudah kami terima 😊")
         else:
             st.error("Harap Mengisi Seluruh Kolom Dengan Benar!")
-    if st.button("Liat Riwayat Kunjunagan"):
+    if st.button("Liat Riwayat Kunjungan"):
         switch_page("data")
 
 elif st.session_state.page == "data":
