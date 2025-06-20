@@ -1,53 +1,96 @@
 import streamlit as st
-import pandas as pd
+import json
 from datetime import datetime
+from pathlib import Path
 
-# Initialize session state for visitor data
+# Konfigurasi file penyimpanan
+DATA_FILE = "kunjungan_data.json"
+
+# Fungsi untuk memastikan file ada
+def ensure_data_file():
+    if not Path(DATA_FILE).exists():
+        with open(DATA_FILE, 'w') as f:
+            json.dump([], f)
+
+# Fungsi baca data
+def load_data():
+    ensure_data_file()
+    with open(DATA_FILE, 'r') as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+# Fungsi simpan data
+def save_data(data):
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
+# Inisialisasi data
 if 'visitor_data' not in st.session_state:
-    st.session_state.visitor_data = []
+    st.session_state.visitor_data = load_data()
 
+# Navigasi halaman
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
 def switch_page(page_name):
     st.session_state.page = page_name
-    st.rerun()
 
-st.title("Review Kunjungan BPS KOTA JAKARTA UTARA")
-
+# UI Halaman Utama
 if st.session_state.page == "home":
-    st.title("REVIEW KUNJUNGAN")
-    nama_pengunjung = st.text_input("Nama Pengunjung")
-    instansi = st.text_input("Instansi Asal")
-    tujuan = st.text_input("Tujuan")
-    respon_pengunjung = st.radio("Bagaimana Kunjungan Anda:", ("☹️ Tidak Puas", "🙂 Puas", "😁 Sangat Puas"), horizontal=True)
-
-    if st.button("Kirim"):
-        if nama_pengunjung and instansi and tujuan and respon_pengunjung is not None:
-            # Add new data to session state
-            st.session_state.visitor_data.append({
-                "id": len(st.session_state.visitor_data) + 1,
-                "nama_pengunjung": nama_pengunjung,
-                "instansi": instansi,
-                "tujuan": tujuan,
-                "respon_pengunjung": respon_pengunjung,
-                "tanggal_kunjungan": datetime.now().strftime("%Y-%m-%d")
-            })
-            st.success(f"Terima Kasih {nama_pengunjung}, Respon anda sudah kami terima 😊")
-        else:
-            st.error("Harap Mengisi Seluruh Kolom Dengan Benar!")
+    st.title("📝 Form Review Kunjungan BPS")
     
-    if st.button("Liat Riwayat Kunjungan"):
+    with st.form("kunjungan_form", clear_on_submit=True):
+        st.subheader("Data Pengunjung")
+        nama = st.text_input("Nama Lengkap")
+        instansi = st.text_input("Asal Instansi/Perusahaan")
+        tujuan = st.text_area("Tujuan Kunjungan")
+        rating = st.radio(
+            "Rating Kepuasan", 
+            ["⭐ Sangat Puas", "👍 Puas", "👎 Kurang Puas"],
+            index=None
+        )
+        
+        if st.form_submit_button("Simpan Data"):
+            if all([nama, instansi, tujuan, rating]):
+                new_data = {
+                    "id": len(st.session_state.visitor_data) + 1,
+                    "nama": nama,
+                    "instansi": instansi,
+                    "tujuan": tujuan,
+                    "rating": rating,
+                    "waktu": datetime.now().strftime("%d/%m/%Y %H:%M")
+                }
+                
+                st.session_state.visitor_data.append(new_data)
+                save_data(st.session_state.visitor_data)
+                
+                st.success("Data berhasil disimpan!")
+                st.balloons()
+            else:
+                st.error("Harap lengkapi semua field!")
+
+    if st.button("Lihat Data Tersimpan"):
         switch_page("data")
 
+# UI Halaman Data
 elif st.session_state.page == "data":
-    if st.session_state.visitor_data:
-        # Convert to DataFrame and display
-        df = pd.DataFrame(st.session_state.visitor_data)
-        df = df.set_index('id')  # Set ID as index
-        st.dataframe(df)
+    st.title("📊 Data Kunjungan Tersimpan")
+    
+    if not st.session_state.visitor_data:
+        st.warning("Belum ada data yang tersimpan")
     else:
-        st.warning("Belum ada data kunjungan.")
+        # Tampilkan data dalam bentuk cards
+        for item in reversed(st.session_state.visitor_data):
+            with st.expander(f"{item['nama']} - {item['waktu']}"):
+                cols = st.columns(2)
+                with cols[0]:
+                    st.markdown(f"**Instansi:** {item['instansi']}")
+                    st.markdown(f"**Tujuan:** {item['tujuan']}")
+                with cols[1]:
+                    st.markdown(f"**Rating:** {item['rating']}")
+                    st.markdown(f"**ID:** #{item['id']}")
     
     if st.button("Kembali ke Form"):
         switch_page("home")
