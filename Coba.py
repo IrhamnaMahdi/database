@@ -29,13 +29,26 @@ if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
 
 if "page" not in st.session_state:
-    st.session_state.page = "home"
+    st.session_state.page = "login"
 
 def switch_page(page_name):
     st.session_state.page = page_name
 
+# Halaman Login
+if st.session_state.page == "login":
+    st.title("Harap login terlebih dahulu untuk masuk")
+
+    uname = st.text_input("Username")
+    pw = st.text_input("Password")
+    
+    if st.button("Login"):
+        if nama == "bpsjakartakota" and pw == "bps3175":
+            st.success(switch_page("home"))
+        elif:
+            st.error("Harap isi data dengan benar")
+
 # Halaman Utama
-if st.session_state.page == "home":
+elif st.session_state.page == "home":
     st.title("📝 Form Review Kunjungan BPS")
     
     with st.form("kunjungan_form", clear_on_submit=True):
