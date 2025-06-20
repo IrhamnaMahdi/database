@@ -61,7 +61,6 @@ if st.session_state.page == "login":
             if authenticate(username, password):
                 st.session_state.logged_in = True
                 st.session_state.page = "home"
-                st.rerun()
             else:
                 st.error("Username atau password salah")
 
@@ -109,7 +108,6 @@ if st.session_state.page == "home" and st.session_state.logged_in:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.session_state.page = "login"
-        st.rerun()
 
 # Halaman Data
 elif st.session_state.page == "data" and st.session_state.logged_in:
@@ -146,7 +144,6 @@ elif st.session_state.page == "data" and st.session_state.logged_in:
                     st.session_state.visitor_data = []
                     save_data([])
                     st.success("Semua data berhasil dihapus!")
-                    st.rerun()
                 else:
                     st.warning("Tidak ada data untuk dihapus")
     
@@ -158,10 +155,8 @@ elif st.session_state.page == "data" and st.session_state.logged_in:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.session_state.page = "login"
-        st.rerun()
 
 # Redirect jika belum login
 elif not st.session_state.logged_in:
     st.warning("Silakan login terlebih dahulu")
     switch_page("login")
-    st.rerun()
