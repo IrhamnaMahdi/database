@@ -5,9 +5,14 @@ from datetime import datetime
 import pytz
 from pathlib import Path
 
-# Konfigurasi file penyimpanan
+# Konfigurasi
 DATA_FILE = "kunjungan_data.json"
+LOGIN_INFO = {
+    "username": "bpskotajakut",
+    "password": "bps3175"
+}
 
+# Fungsi-fungsi data
 def ensure_data_file():
     if not Path(DATA_FILE).exists():
         with open(DATA_FILE, 'w') as f:
@@ -25,30 +30,43 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
+# Inisialisasi session state
 if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
 
 if "page" not in st.session_state:
     st.session_state.page = "login"
 
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# Fungsi navigasi
 def switch_page(page_name):
     st.session_state.page = page_name
 
+# Fungsi login
+def authenticate(username, password):
+    return username == LOGIN_INFO["username"] and password == LOGIN_INFO["password"]
+
 # Halaman Login
 if st.session_state.page == "login":
-    st.title("Harap login terlebih dahulu untuk masuk")
-
-    uname = st.text_input("Username")
-    pw = st.text_input("Password")
+    st.title("🔐 Login Sistem Kunjungan BPS")
+    st.divider()
     
-    if st.button("Login"):
-        if nama == "bpsjakartakota" and pw == "bps3175":
-            st.success(switch_page("home"))
-        else:
-            st.error("Harap isi data dengan benar")
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        
+        if st.form_submit_button("Login"):
+            if authenticate(username, password):
+                st.session_state.logged_in = True
+                st.session_state.page = "home"
+                st.rerun()
+            else:
+                st.error("Username atau password salah")
 
-# Halaman Utama
-elif st.session_state.page == "home":
+# Halaman Utama (hanya bisa diakses setelah login)
+if st.session_state.page == "home" and st.session_state.logged_in:
     st.title("📝 Form Review Kunjungan BPS")
     
     with st.form("kunjungan_form", clear_on_submit=True):
@@ -86,45 +104,44 @@ elif st.session_state.page == "home":
     if st.button("Lihat Data Tersimpan"):
         switch_page("data")
 
+    # Tombol logout
+    st.divider()
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.session_state.page = "login"
+        st.rerun()
+
 # Halaman Data
-elif st.session_state.page == "data":
+elif st.session_state.page == "data" and st.session_state.logged_in:
     st.title("📊 Data Kunjungan Tersimpan")
     
     if not st.session_state.visitor_data:
         st.warning("Belum ada data yang tersimpan")
     else:
-        # Tampilkan data dengan kolom lebih rapi
         for item in reversed(st.session_state.visitor_data):
             with st.expander(f"{item['nama']} ({item['instansi']}) - {item['waktu']}"):
                 st.markdown(f"**ID:** #{item['id']}")
                 st.markdown(f"**Tujuan:** {item['tujuan']}")
                 st.markdown(f"**Rating:** {item['rating']}")
 
-        # Section Ekspor Data
         st.divider()
         st.subheader("Manajemen Data")
         
-        # Dalam satu baris horizontal
         col1, col2 = st.columns(2)
-        
         with col1:
-            # Export Button
             csv = pd.DataFrame(st.session_state.visitor_data).to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Ekspor ke CSV",
                 data=csv,
                 file_name='data_kunjungan.csv',
                 mime='text/csv',
-                help="Unduh semua data dalam format CSV",
                 use_container_width=True
             )
         
         with col2:
-            # Delete Button
             if st.button("🗑️ Hapus Semua Data", 
                        use_container_width=True,
-                       type="primary",
-                       help="Hapus permanen semua data"):
+                       type="primary"):
                 if st.session_state.visitor_data:
                     st.session_state.visitor_data = []
                     save_data([])
@@ -133,6 +150,18 @@ elif st.session_state.page == "data":
                 else:
                     st.warning("Tidak ada data untuk dihapus")
     
-    # Kembali ke form
     if st.button("← Kembali ke Form Utama"):
         switch_page("home")
+    
+    # Tombol logout
+    st.divider()
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.session_state.page = "login"
+        st.rerun()
+
+# Redirect jika belum login
+elif not st.session_state.logged_in:
+    st.warning("Silakan login terlebih dahulu")
+    switch_page("login")
+    st.rerun()
