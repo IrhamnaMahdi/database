@@ -44,7 +44,7 @@ if st.session_state.page == "login":
     if st.button("Login"):
         if nama == "bpsjakartakota" and pw == "bps3175":
             st.success(switch_page("home"))
-        elif:
+        else:
             st.error("Harap isi data dengan benar")
 
 # Halaman Utama
