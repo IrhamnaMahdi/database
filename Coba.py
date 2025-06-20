@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 
-DB_HOST = "db.sjztvgnkawanuktaeluv.supabase.co"
+DB_HOST = "db.ogrudbnzguoqionhfbqe.supabase.co"
 DB_PORT = 5432
 DB_NAME = "postgres"
 DB_USER = "postgres"
