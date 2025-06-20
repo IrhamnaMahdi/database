@@ -8,13 +8,11 @@ from pathlib import Path
 # Konfigurasi file penyimpanan
 DATA_FILE = "kunjungan_data.json"
 
-# Fungsi untuk memastikan file ada
 def ensure_data_file():
     if not Path(DATA_FILE).exists():
         with open(DATA_FILE, 'w') as f:
             json.dump([], f)
 
-# Fungsi baca data
 def load_data():
     ensure_data_file()
     with open(DATA_FILE, 'r') as f:
@@ -23,31 +21,20 @@ def load_data():
         except json.JSONDecodeError:
             return []
 
-# Fungsi simpan data
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
-# Fungsi hapus data
-def delete_data(id_to_delete):
-    updated_data = [item for item in st.session_state.visitor_data if item['id'] != id_to_delete]
-    st.session_state.visitor_data = updated_data
-    save_data(updated_data)
-    st.success(f"Data ID {id_to_delete} berhasil dihapus!")
-    st.rerun()
-
-# Inisialisasi data
 if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
 
-# Navigasi halaman
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
 def switch_page(page_name):
     st.session_state.page = page_name
 
-# UI Halaman Utama
+# Halaman Utama
 if st.session_state.page == "home":
     st.title("📝 Form Review Kunjungan BPS")
     
@@ -64,7 +51,6 @@ if st.session_state.page == "home":
         
         if st.form_submit_button("Simpan Data"):
             if all([nama, instansi, tujuan, rating]):
-                # Mengatur zona waktu ke GMT+7
                 timezone = pytz.timezone('Asia/Jakarta')
                 current_time = datetime.now(timezone).strftime("%d/%m/%Y %H:%M")
                 
@@ -79,7 +65,6 @@ if st.session_state.page == "home":
                 
                 st.session_state.visitor_data.append(new_data)
                 save_data(st.session_state.visitor_data)
-                
                 st.success("Data berhasil disimpan!")
                 st.balloons()
             else:
@@ -88,48 +73,53 @@ if st.session_state.page == "home":
     if st.button("Lihat Data Tersimpan"):
         switch_page("data")
 
-# UI Halaman Data
+# Halaman Data
 elif st.session_state.page == "data":
     st.title("📊 Data Kunjungan Tersimpan")
     
     if not st.session_state.visitor_data:
         st.warning("Belum ada data yang tersimpan")
     else:
-        # Tampilkan data dalam bentuk cards
+        # Tampilkan data dengan kolom lebih rapi
         for item in reversed(st.session_state.visitor_data):
-            with st.expander(f"ID {item['id']}: {item['nama']} - {item['waktu']}"):
-                cols = st.columns([3,1])
-                with cols[0]:
-                    st.markdown(f"**Instansi:** {item['instansi']}")
-                    st.markdown(f"**Tujuan:** {item['tujuan']}")
-                    st.markdown(f"**Rating:** {item['rating']}")
-                
-                with cols[1]:
-                    # Tombol hapus dengan konfirmasi
-                    if st.button(f"❌ Hapus", key=f"del_{item['id']}"):
-                        delete_data(item['id'])
-        
-        # Ekspor data
+            with st.expander(f"{item['nama']} ({item['instansi']}) - {item['waktu']}"):
+                st.markdown(f"**ID:** #{item['id']}")
+                st.markdown(f"**Tujuan:** {item['tujuan']}")
+                st.markdown(f"**Rating:** {item['rating']}")
+
+        # Section Ekspor Data
         st.divider()
-        st.subheader("Ekspor Data")
+        st.subheader("Manajemen Data")
         
-        df = pd.DataFrame(st.session_state.visitor_data)
-        csv = df.to_csv(index=False).encode('utf-8')
-        
+        # Dalam satu baris horizontal
         col1, col2 = st.columns(2)
+        
         with col1:
+            # Export Button
+            csv = pd.DataFrame(st.session_state.visitor_data).to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="📥 Download CSV",
+                label="📥 Ekspor ke CSV",
                 data=csv,
                 file_name='data_kunjungan.csv',
-                mime='text/csv'
+                mime='text/csv',
+                help="Unduh semua data dalam format CSV",
+                use_container_width=True
             )
+        
         with col2:
-            if st.button("🗑️ Hapus Semua Data", type="secondary"):
-                st.session_state.visitor_data = []
-                save_data([])
-                st.success("Semua data berhasil dihapus!")
-                st.rerun()
+            # Delete Button
+            if st.button("🗑️ Hapus Semua Data", 
+                       use_container_width=True,
+                       type="primary",
+                       help="Hapus permanen semua data"):
+                if st.session_state.visitor_data:
+                    st.session_state.visitor_data = []
+                    save_data([])
+                    st.success("Semua data berhasil dihapus!")
+                    st.rerun()
+                else:
+                    st.warning("Tidak ada data untuk dihapus")
     
-    if st.button("← Kembali ke Form"):
+    # Kembali ke form
+    if st.button("← Kembali ke Form Utama"):
         switch_page("home")
