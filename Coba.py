@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+import pandas as pd
 from datetime import datetime
 import pytz
 from pathlib import Path
@@ -49,8 +50,7 @@ if st.session_state.page == "home":
         tujuan = st.text_area("Tujuan Kunjungan")
         rating = st.radio(
             "Rating Kepuasan", 
-            ["😁 Sangat Puas", "🙂 Puas", "☹️ Kurang Puas"],
-            horizontal=True,
+            ["⭐ Sangat Puas", "👍 Puas", "👎 Kurang Puas"],
             index=None
         )
         
@@ -97,6 +97,23 @@ elif st.session_state.page == "data":
                 with cols[1]:
                     st.markdown(f"**Rating:** {item['rating']}")
                     st.markdown(f"**ID:** #{item['id']}")
+        
+        # Tambahkan tombol export CSV
+        st.divider()
+        st.subheader("Ekspor Data")
+        
+        # Konversi data ke DataFrame
+        df = pd.DataFrame(st.session_state.visitor_data)
+        
+        # Tombol download CSV
+        csv = df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Data (CSV)",
+            data=csv,
+            file_name='data_kunjungan.csv',
+            mime='text/csv',
+            help="Klik untuk mengunduh data dalam format CSV"
+        )
     
     if st.button("Kembali ke Form"):
         switch_page("home")
