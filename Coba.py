@@ -61,7 +61,7 @@ if st.session_state.page == "login":
                 st.error("Username atau password salah")
 
 # Halaman Utama (hanya bisa diakses setelah login)
-if st.session_state.page == "home":
+elif st.session_state.page == "home":
     st.title("📝 Form Review Kunjungan BPS")
     
     with st.form("kunjungan_form", clear_on_submit=True):
