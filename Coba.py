@@ -35,7 +35,7 @@ if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
 
 if "page" not in st.session_state:
-    st.session_state.page = "login"
+    st.session_state.page = "login"  # Halaman pertama adalah login
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -43,7 +43,6 @@ if 'logged_in' not in st.session_state:
 # Fungsi navigasi
 def switch_page(page_name):
     st.session_state.page = page_name
-    st.rerun()
 
 # Fungsi login
 def authenticate(username, password):
@@ -61,7 +60,7 @@ if st.session_state.page == "login":
         if st.form_submit_button("Login"):
             if authenticate(username, password):
                 st.session_state.logged_in = True
-                st.session_state.page = "home"
+                switch_page("home")  # Pindah ke halaman home
             else:
                 st.error("Username atau password salah")
 
@@ -98,9 +97,8 @@ if st.session_state.page == "home" and st.session_state.logged_in:
                 save_data(st.session_state.visitor_data)
                 st.success("Data berhasil disimpan!")
                 st.balloons()
-            else:
-                st.error("Harap lengkapi semua field!")
 
+    # Tombol untuk melihat data tersimpan
     if st.button("Lihat Data Tersimpan"):
         switch_page("data")
 
@@ -108,7 +106,7 @@ if st.session_state.page == "home" and st.session_state.logged_in:
     st.divider()
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
-        st.session_state.page = "login"
+        switch_page("login")
 
 # Halaman Data
 elif st.session_state.page == "data" and st.session_state.logged_in:
@@ -145,10 +143,11 @@ elif st.session_state.page == "data" and st.session_state.logged_in:
                     st.session_state.visitor_data = []
                     save_data([])
                     st.success("Semua data berhasil dihapus!")
-                    switch_page("data")
+                    st.rerun()
                 else:
                     st.warning("Tidak ada data untuk dihapus")
     
+    # Tombol untuk kembali ke form utama
     if st.button("← Kembali ke Form Utama"):
         switch_page("home")
     
@@ -156,9 +155,4 @@ elif st.session_state.page == "data" and st.session_state.logged_in:
     st.divider()
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
-        st.session_state.page = "login"
-
-# Redirect jika belum login
-elif not st.session_state.logged_in:
-    st.warning("Silakan login terlebih dahulu")
-    switch_page("login")
+        switch_page("login")
