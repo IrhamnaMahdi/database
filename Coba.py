@@ -43,6 +43,7 @@ if 'logged_in' not in st.session_state:
 # Fungsi navigasi
 def switch_page(page_name):
     st.session_state.page = page_name
+    st.rerun()
 
 # Fungsi login
 def authenticate(username, password):
@@ -144,6 +145,7 @@ elif st.session_state.page == "data" and st.session_state.logged_in:
                     st.session_state.visitor_data = []
                     save_data([])
                     st.success("Semua data berhasil dihapus!")
+                    switch_page("data")
                 else:
                     st.warning("Tidak ada data untuk dihapus")
     
