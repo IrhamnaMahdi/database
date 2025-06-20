@@ -35,10 +35,7 @@ if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
 
 if "page" not in st.session_state:
-    st.session_state.page = "login"  # Halaman pertama adalah login
-
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+    st.session_state.page = "login" 
 
 # Fungsi navigasi
 def switch_page(page_name):
@@ -59,13 +56,12 @@ if st.session_state.page == "login":
         
         if st.form_submit_button("Login"):
             if authenticate(username, password):
-                st.session_state.logged_in = True
-                switch_page("home")  # Pindah ke halaman home
+                switch_page("home") 
             else:
                 st.error("Username atau password salah")
 
 # Halaman Utama (hanya bisa diakses setelah login)
-if st.session_state.page == "home" and st.session_state.logged_in:
+if st.session_state.page == "home":
     st.title("📝 Form Review Kunjungan BPS")
     
     with st.form("kunjungan_form", clear_on_submit=True):
@@ -109,7 +105,7 @@ if st.session_state.page == "home" and st.session_state.logged_in:
         switch_page("login")
 
 # Halaman Data
-elif st.session_state.page == "data" and st.session_state.logged_in:
+elif st.session_state.page == "data":
     st.title("📊 Data Kunjungan Tersimpan")
     
     if not st.session_state.visitor_data:
