@@ -5,12 +5,7 @@ from datetime import datetime
 import pytz
 from pathlib import Path
 
-# Konfigurasi
 DATA_FILE = "kunjungan_data.json"
-LOGIN_INFO = {
-    "username": "bpskotajakut",
-    "password": "bps3175"
-}
 
 # Fungsi-fungsi data
 def ensure_data_file():
@@ -43,7 +38,7 @@ def switch_page(page_name):
 
 # Fungsi login
 def authenticate(username, password):
-    return username == LOGIN_INFO["username"] and password == LOGIN_INFO["password"]
+    return username == st.secrets["username"] and password == st.secrets["password"]
 
 # Halaman Login
 if st.session_state.page == "login":
@@ -101,7 +96,6 @@ elif st.session_state.page == "home":
     # Tombol logout
     st.divider()
     if st.button("🚪 Logout"):
-        st.session_state.logged_in = False
         switch_page("login")
 
 # Halaman Data
@@ -150,5 +144,4 @@ elif st.session_state.page == "data":
     # Tombol logout
     st.divider()
     if st.button("🚪 Logout"):
-        st.session_state.logged_in = False
         switch_page("login")
