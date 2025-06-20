@@ -42,8 +42,6 @@ elif st.session_state.page == "data":
     if visitor_data:
         data = pd.DataFrame(visitor_data)
         st.dataframe(data)
-    else:
-        st.write("Belum ada data kunjungan.")
     
     if st.button("Back"):
         switch_page("home")
