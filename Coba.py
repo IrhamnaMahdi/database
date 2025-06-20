@@ -28,6 +28,14 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
+# Fungsi hapus data
+def delete_data(id_to_delete):
+    updated_data = [item for item in st.session_state.visitor_data if item['id'] != id_to_delete]
+    st.session_state.visitor_data = updated_data
+    save_data(updated_data)
+    st.success(f"Data ID {id_to_delete} berhasil dihapus!")
+    st.rerun()
+
 # Inisialisasi data
 if 'visitor_data' not in st.session_state:
     st.session_state.visitor_data = load_data()
@@ -89,31 +97,39 @@ elif st.session_state.page == "data":
     else:
         # Tampilkan data dalam bentuk cards
         for item in reversed(st.session_state.visitor_data):
-            with st.expander(f"{item['nama']} - {item['waktu']}"):
-                cols = st.columns(2)
+            with st.expander(f"ID {item['id']}: {item['nama']} - {item['waktu']}"):
+                cols = st.columns([3,1])
                 with cols[0]:
                     st.markdown(f"**Instansi:** {item['instansi']}")
                     st.markdown(f"**Tujuan:** {item['tujuan']}")
-                with cols[1]:
                     st.markdown(f"**Rating:** {item['rating']}")
-                    st.markdown(f"**ID:** #{item['id']}")
+                
+                with cols[1]:
+                    # Tombol hapus dengan konfirmasi
+                    if st.button(f"❌ Hapus", key=f"del_{item['id']}"):
+                        delete_data(item['id'])
         
-        # Tambahkan tombol export CSV
+        # Ekspor data
         st.divider()
         st.subheader("Ekspor Data")
         
-        # Konversi data ke DataFrame
         df = pd.DataFrame(st.session_state.visitor_data)
-        
-        # Tombol download CSV
         csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Download Data (CSV)",
-            data=csv,
-            file_name='data_kunjungan.csv',
-            mime='text/csv',
-            help="Klik untuk mengunduh data dalam format CSV"
-        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="📥 Download CSV",
+                data=csv,
+                file_name='data_kunjungan.csv',
+                mime='text/csv'
+            )
+        with col2:
+            if st.button("🗑️ Hapus Semua Data", type="secondary"):
+                st.session_state.visitor_data = []
+                save_data([])
+                st.success("Semua data berhasil dihapus!")
+                st.rerun()
     
-    if st.button("Kembali ke Form"):
+    if st.button("← Kembali ke Form"):
         switch_page("home")
