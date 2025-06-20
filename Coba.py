@@ -6,7 +6,7 @@ DB_HOST = "db.ogrudbnzguoqionhfbqe.supabase.co"
 DB_PORT = 5432
 DB_NAME = "postgres"
 DB_USER = "postgres"
-DB_PASS = "tytydkuda134"
+DB_PASS = "bpskotajakut"
 
 # Function to load data from PostgreSQL
 def get_db_connection():
