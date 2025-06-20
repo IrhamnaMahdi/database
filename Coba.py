@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
-# Initialize an empty list to store visitor data
-visitor_data = []
+# Initialize session state for visitor data
+if 'visitor_data' not in st.session_state:
+    st.session_state.visitor_data = []
 
 if "page" not in st.session_state:
-    st.session_state.page = "home"  # Default page
+    st.session_state.page = "home"
 
 def switch_page(page_name):
     st.session_state.page = page_name
@@ -22,13 +24,14 @@ if st.session_state.page == "home":
 
     if st.button("Kirim"):
         if nama_pengunjung and instansi and tujuan and respon_pengunjung is not None:
-            # Append the new visitor data to the list
-            visitor_data.append({
+            # Add new data to session state
+            st.session_state.visitor_data.append({
+                "id": len(st.session_state.visitor_data) + 1,
                 "nama_pengunjung": nama_pengunjung,
                 "instansi": instansi,
                 "tujuan": tujuan,
                 "respon_pengunjung": respon_pengunjung,
-                "tanggal_kunjungan": pd.to_datetime("today").date()  # Store the current date
+                "tanggal_kunjungan": datetime.now().strftime("%Y-%m-%d")
             })
             st.success(f"Terima Kasih {nama_pengunjung}, Respon anda sudah kami terima 😊")
         else:
@@ -38,9 +41,13 @@ if st.session_state.page == "home":
         switch_page("data")
 
 elif st.session_state.page == "data":
-    # Convert the visitor data list to a DataFrame for display
-    data = pd.DataFrame(visitor_data)
-    st.dataframe(data)
+    if st.session_state.visitor_data:
+        # Convert to DataFrame and display
+        df = pd.DataFrame(st.session_state.visitor_data)
+        df = df.set_index('id')  # Set ID as index
+        st.dataframe(df)
+    else:
+        st.warning("Belum ada data kunjungan.")
     
-    if st.button("Back"):
+    if st.button("Kembali ke Form"):
         switch_page("home")
