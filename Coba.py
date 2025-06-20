@@ -2,6 +2,12 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 
+DB_HOST = "db.sjztvgnkawanuktaeluv.supabase.co"
+DB_PORT = 5432
+DB_NAME = "postgres"
+DB_USER = "postgres"
+DB_PASS = "tytydkuda134"
+
 # Function to load data from PostgreSQL
 def get_db_connection():
     return psycopg2.connect(
