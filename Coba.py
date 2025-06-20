@@ -39,9 +39,8 @@ if st.session_state.page == "home":
 
 elif st.session_state.page == "data":
     # Convert the visitor data list to a DataFrame for display
-    if visitor_data:
-        data = pd.DataFrame(visitor_data)
-        st.dataframe(data)
+    data = pd.DataFrame(visitor_data)
+    st.dataframe(data)
     
     if st.button("Back"):
         switch_page("home")
