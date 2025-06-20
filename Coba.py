@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 from datetime import datetime
+import pytz
 from pathlib import Path
 
 # Konfigurasi file penyimpanan
@@ -48,19 +49,24 @@ if st.session_state.page == "home":
         tujuan = st.text_area("Tujuan Kunjungan")
         rating = st.radio(
             "Rating Kepuasan", 
-            ["⭐ Sangat Puas", "👍 Puas", "👎 Kurang Puas"],
+            ["😁 Sangat Puas", "🙂 Puas", "☹️ Kurang Puas"],
+            horizontal=True,
             index=None
         )
         
         if st.form_submit_button("Simpan Data"):
             if all([nama, instansi, tujuan, rating]):
+                # Mengatur zona waktu ke GMT+7
+                timezone = pytz.timezone('Asia/Jakarta')
+                current_time = datetime.now(timezone).strftime("%d/%m/%Y %H:%M")
+                
                 new_data = {
                     "id": len(st.session_state.visitor_data) + 1,
                     "nama": nama,
                     "instansi": instansi,
                     "tujuan": tujuan,
                     "rating": rating,
-                    "waktu": datetime.now().strftime("%d/%m/%Y %H:%M")
+                    "waktu": current_time
                 }
                 
                 st.session_state.visitor_data.append(new_data)
